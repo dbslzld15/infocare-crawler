@@ -1,0 +1,33 @@
+FROM python:3.8.5-buster
+
+ARG poetry_version=1.0.5
+ARG env=production
+
+RUN pip install -U pip "poetry==${poetry_version}"
+RUN poetry config virtualenvs.create false
+
+COPY ./app/infocare-crawler/pyproject.toml /crawler/app/infocare-crawler/pyproject.toml
+COPY ./app/infocare-crawler/poetry.lock /crawler/app/infocare-crawler/poetry.lock
+COPY ./lib/crawler-python-commons/setup.py /crawler/lib/crawler-python-commons/setup.py
+COPY ./lib/tanker-python-commons/setup.py /crawler/lib/tanker-python-commons/setup.py
+COPY ./lib/tanker-core/setup.py /crawler/lib/tanker-core/setup.py
+
+WORKDIR /crawler/app/infocare-crawler/
+
+RUN if [ ${env} != "production" ]; then \
+        POETRY_ARGS=""; \
+    else \
+        POETRY_ARGS="--no-dev"; \
+    fi; \
+    poetry install \
+        --no-interaction \
+        --no-ansi \
+        ${POETRY_ARGS}
+
+
+COPY ./app/infocare-crawler /crawler/app/infocare-crawler
+COPY ./lib/crawler-python-commons /crawler/lib/crawler-python-commons
+COPY ./lib/tanker-python-commons /crawler/lib/tanker-python-commons
+COPY ./lib/tanker-core /crawler/lib/tanker-core
+
+CMD python manage.py run

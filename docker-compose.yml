@@ -1,0 +1,33 @@
+version: "3.3"
+volumes:
+  pgdata:
+services:
+  infocare-crawler:
+    build:
+      context: .
+      dockerfile: Dockerfile-infocare-crawler
+      args:
+        env: local
+    command: >
+      python manage.py run
+    volumes:
+      - ./app/infocare-crawler/:/crawler/app/infocare-crawler/
+      - ./lib/crawler-python-commons:/crawler/lib/crawler-python-commons
+      - ./lib/tanker-python-commons:/crawler/lib/tanker-python-commons
+    environment:
+      CRAWLER_ENVIRONMENT: local
+  infocare-store:
+    build:
+      context: .
+      dockerfile: Dockerfile-infocare-store
+      args:
+        env: local
+    command: >
+      python manage.py run
+    volumes:
+      - ./app/infocare-store/:/store/app/infocare-store/
+      - ./lib/crawler-python-commons:/store/lib/crawler-python-commons
+      - ./lib/tanker-python-commons:/store/lib/tanker-python-commons
+      - ./lib/loan-model:/store/lib/loan-model
+    environment:
+      STORE_ENVIRONMENT: local
